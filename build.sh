@@ -1,0 +1,1 @@
+tcc -Isrc -lass src/libass_csri.c  src/posix/openfile.c -run src/test.c data/test.ass
