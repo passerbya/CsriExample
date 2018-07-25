@@ -1,0 +1,11 @@
+csri_open_file
+csri_open_mem
+csri_close
+csri_request_fmt
+csri_render
+csri_query_ext
+csri_renderer_info
+csri_renderer_byname
+csri_renderer_byext
+csri_renderer_default
+csri_renderer_next

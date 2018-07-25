@@ -124,6 +124,13 @@ int main(int argc, const char* argv[])
 	}
 	WriteBMP("test.bmp", img);
 	// system("test.bmp");
+	//
+	csri_rend *cur = csri_rend_xxx;
+	do
+	{
+		puts(csri_renderer_info(cur)->name);
+	}
+	while(cur = csri_renderer_next(cur));
 
 	csri_close(g_csri_inst_yyy);
 	free(img->buffer);
