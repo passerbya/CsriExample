@@ -46,6 +46,16 @@ void WriteBMP(const char* filename, image_t *img)
 	fclose(fp);
 }
 
+void list_render(csri_rend* cur)
+{
+	do
+	{
+		puts(csri_renderer_info(cur)->name);
+		cur = csri_renderer_next(cur);
+	}
+	while(cur);
+}
+
 int main(int argc, const char* argv[])
 {
 	if(argc < 2)
@@ -61,12 +71,12 @@ int main(int argc, const char* argv[])
 	double start = 0;
 	double end = 3;
 
-	csri_inst * g_csri_inst_yyy = NULL;
-	csri_rend * csri_rend_xxx = csri_renderer_default();
+	csri_inst * csriInstance = NULL;
+	csri_rend * csriRender = csri_renderer_default();
 
-	g_csri_inst_yyy = csri_open_file(csri_rend_xxx, filename, NULL);
+	csriInstance = csri_open_file(csriRender, filename, NULL);
 	
-	if(!g_csri_inst_yyy)
+	if(!csriInstance)
 	{
 		puts("csri_open_file error.");
 		return -1;
@@ -92,9 +102,9 @@ int main(int argc, const char* argv[])
 	this_frame.planes[0] = canvas + (height - 1) * width * 4;
 	this_frame.strides[0] = -(signed)width * 4;
 
-	int state = csri_request_fmt(g_csri_inst_yyy, &fmt);
+	int state = csri_request_fmt(csriInstance, &fmt);
 
-	csri_render(g_csri_inst_yyy, &this_frame, 2);
+	csri_render(csriInstance, &this_frame, 2);
 
 	int px_count = byte_size;
 
@@ -125,13 +135,8 @@ int main(int argc, const char* argv[])
 	WriteBMP("test.bmp", img);
 	// system("test.bmp");
 	//
-	csri_rend *cur = csri_rend_xxx;
-	do
-	{
-		puts(csri_renderer_info(cur)->name);
-	}
-	while(cur = csri_renderer_next(cur));
+	list_render(csriRender);
 
-	csri_close(g_csri_inst_yyy);
+	csri_close(csriInstance);
 	free(img->buffer);
 }

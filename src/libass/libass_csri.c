@@ -114,7 +114,7 @@ void csri_render(csri_inst *inst, struct csri_frame *frame, double time)
 		inst->ass_track, (int)(time * 1000), NULL);
 
 	while (img) {
-		unsigned bpp, alpha = 256 - (img->color && 0xFF);
+		unsigned bpp, alpha = 256 - (img->color & 0xFF);
 		int src_d, dst_d;
 		unsigned char *src, *dst, *endy, *endx;
 		unsigned char c[3] = {

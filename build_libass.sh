@@ -3,7 +3,7 @@
 mkdir out_unix
 cd out_unix
 gcc -c -fPIC -I../src -I../src/libass -I../src/win32 ../src/posix/openfile.c ../src/libass/*.c
-gcc -fPIC -shared *.o -o libass_csri.so
+gcc -lass -fPIC -shared *.o -o libass_csri.so
 mv libass_csri.so ../csri/
 cd ..
 rm -rf out_unix
