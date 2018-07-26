@@ -1,10 +1,15 @@
+// note: csri output is only BGR, no alpha channel.
+// alpha effect is only for background
+
 #include "csri/csri.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-// #pragma comment(lib,"VSFilter")
+#ifdef USE_RWIMG
+#include "writeimage.h"
+#endif
 
 typedef struct image_s {
 	int width, height, stride;
@@ -65,11 +70,12 @@ int main(int argc, const char* argv[])
 	}
 	const char *filename = argv[1];
 
-	float fps = 1;
 	int width = 1280;
 	int height = 720;
-	double start = 0;
-	double end = 3;
+	// 2.0s
+	double frame_time = 2.0;
+	
+	int byte_size = width * height * 4;
 
 	csri_inst * csriInstance = NULL;
 	csri_rend * csriRender = csri_renderer_default();
@@ -82,61 +88,68 @@ int main(int argc, const char* argv[])
 		return -1;
 	}
 
-	struct csri_fmt fmt = { CSRI_F_BGR_, width, height };
-
+	struct csri_frame current_frame;
+	memset(&current_frame, 0, sizeof(current_frame));
+	current_frame.pixfmt = CSRI_F_BGR_;
+	
 	unsigned char* canvas = NULL;
-	unsigned char* whiteboard = NULL;
-
-	struct csri_frame this_frame;
-	memset(&this_frame, 0, sizeof(this_frame));
-	this_frame.pixfmt = CSRI_F_BGR_;
-
-	int byte_size = width * height * 4;
-
 	canvas = malloc(byte_size);
-	whiteboard = malloc(byte_size);
-	//
+	
+	//background black
 	memset(canvas, 0, byte_size);
-	memset(whiteboard, 255, byte_size);
 
-	this_frame.planes[0] = canvas + (height - 1) * width * 4;
-	this_frame.strides[0] = -(signed)width * 4;
-
+#ifdef USE_RWIMG
+	current_frame.planes[0] = canvas;
+	current_frame.strides[0] = width * 4;
+#else
+	// BMP need flip
+	current_frame.planes[0] = canvas + (height - 1) * width * 4;
+	current_frame.strides[0] = -(signed)width * 4;
+#endif
+	struct csri_fmt fmt = { current_frame.pixfmt , width, height };
 	int state = csri_request_fmt(csriInstance, &fmt);
+	csri_render(csriInstance, &current_frame, frame_time);
 
-	csri_render(csriInstance, &this_frame, 2);
-
-	int px_count = byte_size;
+	for (int i = 0; i < byte_size; i += 4)
+	{
+		// B
+		// canvas[i + 0] = canvas[i + 0];
+		// G
+		// canvas[i + 1] = canvas[i + 1];
+		// R 
+		// canvas[i + 2] = canvas[i + 2];
+		// A
+		canvas[i + 3] = 255;
+	}
 
 	image_t *img = malloc(sizeof(image_t));
 	img->width = width;
 	img->height = height;
 	img->stride = width * 3;
 	img->buffer = (unsigned char *)calloc(1, height * width * 4);
-
-	unsigned char opacity = 255;
-	unsigned char r = 0;
-	unsigned char g = 0;
-	unsigned char b = 0;
-	for (int i = 0; i < px_count; i += 4)
-	{
-		unsigned k = ((unsigned)canvas[i / 4]) * opacity / 255;
-		canvas[i] = (k * b + (255 - k) * canvas[i]) / 255;
-		canvas[i + 1] = (k * g + (255 - k) * canvas[i + 1]) / 255;
-		canvas[i + 2] = (k * r + (255 - k) *canvas[i + 2]) / 255;
-	}
-
+	
+#ifdef USE_RWIMG
+	// BGR_ => RGB
 	for (int index = 0; index < height*width; ++index)
 	{
-		img->buffer[index * 3] = canvas[index * 4];
+		img->buffer[index * 3] = canvas[index * 4 + 2];
+		img->buffer[index * 3 + 1] = canvas[index * 4 + 1];
+		img->buffer[index * 3 + 2] = canvas[index * 4 + 0];
+	}
+	write_image("test.png", width, height, img->buffer, 3, width * 3, IMAGE_FORMAT_AUTO);
+	free(img->buffer);
+#else
+	// BGR_ => BGR
+	for (int index = 0; index < height*width; ++index)
+	{
+		img->buffer[index * 3] = canvas[index * 4 + 0];
 		img->buffer[index * 3 + 1] = canvas[index * 4 + 1];
 		img->buffer[index * 3 + 2] = canvas[index * 4 + 2];
 	}
 	WriteBMP("test.bmp", img);
-	// system("test.bmp");
+	free(img->buffer);
+#endif
 	//
 	list_render(csriRender);
-
 	csri_close(csriInstance);
-	free(img->buffer);
 }
