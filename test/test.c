@@ -95,8 +95,36 @@ int main(int argc, const char* argv[])
 	unsigned char* canvas = NULL;
 	canvas = malloc(byte_size);
 	
-	//background black
+	// background black
 	memset(canvas, 0, byte_size);
+	// gen chess block
+	int block_size = 32;
+
+	for (int y = 0; y < height; ++y)
+	{
+		for (int x = 0; x < width; ++x)
+		{
+			int index = y * width * 4 + x * 4;
+			int r,g,b;
+			if(((y / block_size) & 1) != ((x / block_size) & 1))
+			{
+				r = 192;
+				g = 192;
+				b = 192;
+			}
+			else
+			{
+				r = 128;
+				g = 128;
+				b = 128;
+			}
+			canvas[index + 0] = b;
+			canvas[index + 1] = g; 
+			canvas[index + 2] = r;
+			canvas[index + 3] = 128;
+		}
+	}
+	//
 
 #ifdef USE_RWIMG
 	current_frame.planes[0] = canvas;
@@ -109,7 +137,7 @@ int main(int argc, const char* argv[])
 	struct csri_fmt fmt = { current_frame.pixfmt , width, height };
 	int state = csri_request_fmt(csriInstance, &fmt);
 	csri_render(csriInstance, &current_frame, frame_time);
-
+			
 	for (int i = 0; i < byte_size; i += 4)
 	{
 		// B
