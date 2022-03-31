@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../csrilib.h"
+#include "csrilib.h"
 #include "subhelp.h"
 
 static void csrilib_enum_dir(const wchar_t *dir);
@@ -81,16 +81,14 @@ static void csrilib_do_load(const wchar_t *filename)
 	const char *sym;
 
 	if (!dlhandle) {
-		subhelp_log(CSRI_LOG_WARNING, "LoadLibraryEx(\"%ls\") failed: "
-			"%s", filename, get_errstr());
+		//subhelp_log(CSRI_LOG_WARNING, "LoadLibraryEx(\"%ls\") failed: %s", filename, get_errstr());
 		return;
 	}
 	if (GetProcAddress(dlhandle, "csri_library")) {
-		subhelp_log(CSRI_LOG_WARNING, "ignoring library %ls",
-			filename);
+		//subhelp_log(CSRI_LOG_WARNING, "ignoring library %ls",filename);
 		goto out_freelib;
 	}
-	subhelp_log(CSRI_LOG_INFO, "loading %ls", filename);
+	//subhelp_log(CSRI_LOG_INFO, "loading %ls", filename);
 
 	tmp.os.dlhandle = dlhandle;
 
@@ -112,6 +110,7 @@ static void csrilib_do_load(const wchar_t *filename)
 	dl_map_function(open_file);
 	dl_map_function(open_mem);
 	dl_map_function(close);
+	dl_map_function(storage_size);
 	dl_map_function(request_fmt);
 	dl_map_function(render);
 #define dl_map_local(x) _dl_map_function(x, x)
@@ -127,8 +126,7 @@ static void csrilib_do_load(const wchar_t *filename)
 	return;
 
 out_dlfail:
-	subhelp_log(CSRI_LOG_WARNING, "%ls: symbol %s not found (%s)",
-		filename, sym, get_errstr());
+	//subhelp_log(CSRI_LOG_WARNING, "%ls: symbol %s not found (%s)",filename, sym, get_errstr());
 out_freelib:
 	FreeLibrary(dlhandle);
 }
@@ -155,12 +153,11 @@ static void csrilib_enum_dir(const wchar_t *dir)
 	_snwprintf(buf, sizeof(buf) / sizeof(buf[0]), L"%ls\\*", dir);
 	res = FindFirstFileW(buf, &data);
 	if (res == INVALID_HANDLE_VALUE) {
-		subhelp_log(CSRI_LOG_WARNING, "ignoring directory \"%ls\": %s",
-			dir, get_errstr());
+		//subhelp_log(CSRI_LOG_WARNING, "ignoring directory \"%ls\": %s",dir, get_errstr());
 		return;
 	}
 
-	subhelp_log(CSRI_LOG_INFO, "scanning directory \"%ls\"", dir);
+	//subhelp_log(CSRI_LOG_INFO, "scanning directory \"%ls\"", dir);
 	do {
 		if (data.cFileName[0] == '.')
 			continue;
@@ -171,7 +168,7 @@ static void csrilib_enum_dir(const wchar_t *dir)
 	FindClose(res);
 }
 
-void csrilib_os_init()
+void csrilib_os_init(int renderMode)
 {
 	wchar_t path[MAX_PATH];
 	wchar_t filename[MAX_PATH], *slash;
@@ -181,11 +178,19 @@ void csrilib_os_init()
 	slash = wcsrchr(filename, L'\\');
 	slash = slash ? slash + 1 : filename;
 	*slash = L'\0';
-	wcsncpy(slash, L"csri", filename + MAX_PATH - slash);
+
+	if (renderMode == 0)
+		wcsncpy(slash, L"csri\\libass", filename + MAX_PATH - slash);
+	else if (renderMode == 1)
+		wcsncpy(slash, L"csri\\vsfiltermod", filename + MAX_PATH - slash);
+
 	csrilib_enum_dir(filename);
+
+#if 0
 	//
 	GetCurrentDirectoryW(MAX_PATH,path);
 	wcsncpy(path + wcslen(path),L"\\csri",MAX_PATH);
 	csrilib_enum_dir(path);
+#endif
 }
 

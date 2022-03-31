@@ -1,6 +1,7 @@
 csri_open_file
 csri_open_mem
 csri_close
+csri_storage_size
 csri_request_fmt
 csri_render
 csri_query_ext

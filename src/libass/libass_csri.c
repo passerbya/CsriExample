@@ -100,11 +100,16 @@ void csri_close(csri_inst *inst)
 	free(inst);
 }
 
+int csri_storage_size(csri_inst *inst, unsigned width, unsigned height)
+{
+	ass_set_storage_size(inst->ass_renderer, width, height);
+	return 0;
+}
+
 int csri_request_fmt(csri_inst *inst, const struct csri_fmt *fmt)
 {
 	if (!csri_is_rgb(fmt->pixfmt) || csri_has_alpha(fmt->pixfmt))
 		return -1;
-	ass_set_storage_size(inst->ass_renderer, fmt->width, fmt->height);
 	ass_set_frame_size(inst->ass_renderer, fmt->width, fmt->height);
 	return 0;
 }

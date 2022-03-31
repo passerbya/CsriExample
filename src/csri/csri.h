@@ -249,6 +249,8 @@ CSRIAPI csri_inst *csri_open_mem(csri_rend *renderer,
 CSRIAPI void csri_close(csri_inst *inst);
 
 
+CSRIAPI int csri_storage_size(csri_inst *inst, unsigned width, unsigned height);
+
 /** query / set the image format and size.
  * \param inst the renderer instance handle
  * \param fmt the format and image size to be used
@@ -338,6 +340,9 @@ CSRIAPI csri_rend *csri_renderer_default();
  *   renderer installed.
  */
 CSRIAPI csri_rend *csri_renderer_next(csri_rend *prev);
+
+CSRIAPI csri_rend *csri_init(int renderMode);
+CSRIAPI void csri_renderer_release();
 
 /*@}*/
 

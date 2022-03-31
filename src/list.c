@@ -61,6 +61,7 @@ csri_inst *csrilib_inst_initadd(struct csri_wrap_rend *wrend,
 	winst->wrend = wrend;
 	winst->inst = inst;
 	winst->close = wrend->close;
+	winst->storage_size = wrend->storage_size;
 	winst->request_fmt = wrend->request_fmt;
 	winst->render = wrend->render;
 	winst->next = NULL;
@@ -82,6 +83,18 @@ void csrilib_inst_remove(struct csri_wrap_inst *winst)
 	free(winst);
 }
 
+void csri_renderer_release()
+{
+	struct csri_wrap_rend *wrap = wraprends;
+	while (wrap)
+	{
+		struct csri_wrap_rend *tmp = wrap->next;
+		free(wrap);
+		wrap = tmp;
+	}
+	wraprends = NULL;
+}
+
 void csrilib_rend_initadd(struct csri_wrap_rend *wrend)
 {
 	wrend->next = wraprends;
@@ -93,9 +106,18 @@ static int initialized = 0;
 csri_rend *csri_renderer_default()
 {
 	if (!initialized) {
-		csrilib_os_init();
+		csrilib_os_init(0);
 		initialized = 1;
 	}
+	if (!wraprends)
+		return NULL;
+	return wraprends->rend;
+}
+
+csri_rend *csri_init(int renderMode)
+{
+	csrilib_os_init(renderMode);
+
 	if (!wraprends)
 		return NULL;
 	return wraprends->rend;
@@ -113,7 +135,7 @@ csri_rend *csri_renderer_byname(const char *name, const char *specific)
 {
 	struct csri_wrap_rend *wrend;
 	if (!initialized) {
-		csrilib_os_init();
+		csrilib_os_init(0);
 		initialized = 1;
 	}
 	if (!name)
@@ -133,7 +155,7 @@ csri_rend *csri_renderer_byext(unsigned n_ext, csri_ext_id *ext)
 	struct csri_wrap_rend *wrend;
 	unsigned i;
 	if (!initialized) {
-		csrilib_os_init();
+		csrilib_os_init(0);
 		initialized = 1;
 	}
 	for (wrend = wraprends; wrend; wrend = wrend->next) {

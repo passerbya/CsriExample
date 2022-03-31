@@ -43,6 +43,7 @@ struct csri_wrap_rend {
 		const void *data, size_t length,
 		struct csri_openflag *flags);
 	void (*close)(csri_inst *inst);
+	int (*storage_size)(csri_inst *inst, unsigned width, unsigned height);
 	int (*request_fmt)(csri_inst *inst, const struct csri_fmt *fmt);
 	void (*render)(csri_inst *inst, struct csri_frame *frame,
 		double time);
@@ -65,6 +66,7 @@ struct csri_wrap_inst {
 	csri_inst *inst;
 	struct csri_wrap_rend *wrend;
 	void (*close)(csri_inst *inst);
+	int (*storage_size)(csri_inst *inst, unsigned width, unsigned height);
 	int (*request_fmt)(csri_inst *inst, const struct csri_fmt *fmt);
 	void (*render)(csri_inst *inst, struct csri_frame *frame,
 		double time);

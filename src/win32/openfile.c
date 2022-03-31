@@ -23,7 +23,7 @@
 #include <stdlib.h>
 
 #include "subhelp.h"
-#include <csri/openerr.h>
+#include "csri/openerr.h"
 
 #ifndef CP_UTF8
 #define CP_UTF8                   65001

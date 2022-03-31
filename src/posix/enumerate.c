@@ -106,6 +106,7 @@ static void csrilib_do_load(const char *filename, dev_t device, ino_t inode)
 	dl_map_function(open_file);
 	dl_map_function(open_mem);
 	dl_map_function(close);
+	dl_map_function(storage_size);
 	dl_map_function(request_fmt);
 	dl_map_function(render);
 #define dl_map_local(x) _dl_map_function(x, x)
