@@ -97,23 +97,24 @@ static void csrilib_do_load(const wchar_t *filename)
  * (which yields a strict-aliasing warning).
  * casting via char* works because char* can alias anything.
  */
-#define _dl_map_function(x, dst) do { \
+#define _dl_map_function(x, dst, fail_return) do { \
 	char *t1 = (char *)&dst; \
 	union x { FARPROC ptr; } *ptr = (union x *)t1; \
 	sym = "csri_" # x; \
 	ptr->ptr = GetProcAddress(dlhandle, sym);\
-	if (!ptr->ptr) goto out_dlfail; } while (0)
-#define dl_map_function(x) _dl_map_function(x, tmp.x)
+	if (!ptr->ptr) { if (fail_return) goto out_dlfail; } } while (0)
+#define dl_map_function(x) _dl_map_function(x, tmp.x, 1)
+#define dl_map_function_allow_fail(x) _dl_map_function(x, tmp.x, 0)
 	dl_map_function(query_ext);
 	subhelp_logging_pass((struct csri_logging_ext *)
 		tmp.query_ext(NULL, CSRI_EXT_LOGGING));
 	dl_map_function(open_file);
 	dl_map_function(open_mem);
 	dl_map_function(close);
-	dl_map_function(storage_size);
+	dl_map_function_allow_fail(storage_size);
 	dl_map_function(request_fmt);
 	dl_map_function(render);
-#define dl_map_local(x) _dl_map_function(x, x)
+#define dl_map_local(x) _dl_map_function(x, x, 1)
 	dl_map_local(renderer_info);
 	dl_map_local(renderer_default);
 	dl_map_local(renderer_next);

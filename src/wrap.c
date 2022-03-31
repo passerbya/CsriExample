@@ -99,7 +99,11 @@ int csri_storage_size(csri_inst *inst, unsigned width, unsigned height)
 	struct csri_wrap_inst *winst = csrilib_inst_lookup(inst);
 	if (!winst)
 		return 0;
-	return winst->storage_size(inst, width, height);
+
+	if (winst->storage_size)
+		return winst->storage_size(inst, width, height);
+	else
+		return 0;
 }
 
 int csri_request_fmt(csri_inst *inst, const struct csri_fmt *fmt)
