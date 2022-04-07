@@ -75,6 +75,7 @@ typedef struct ass_style {
     int MarginR;
     int MarginV;
     int Encoding;
+    double LineSpacing;
     int treat_fontname_as_pattern;
     double Blur;
     int Justify;
