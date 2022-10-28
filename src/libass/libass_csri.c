@@ -160,7 +160,8 @@ void csri_render(csri_inst *inst, struct csri_frame *frame, double time)
 				dst[0] = (s*c[0] + d*dst[0]) >> 8;
 				dst[1] = (s*c[1] + d*dst[1]) >> 8;
 				dst[2] = (s*c[2] + d*dst[2]) >> 8;
-				if (bpp == 4) dst[3] = 255;
+				if (bpp == 4 && s - 1 > dst[3]) 
+					dst[3] = s - 1;
 				dst += bpp;
 			}
 			dst += dst_d;
